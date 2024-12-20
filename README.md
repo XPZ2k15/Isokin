@@ -130,15 +130,15 @@ Create a `.isokine` file (e.g., `project.isokine`) with your project definitions
 Run the generator script with your DSL file and specify the output directory:
 
 ```bash
-node app.js project.isokine ./MyGeneratedApp
+node app.js project.isokine myDirectory
 ```
 
-This command will create a new directory named `MyGeneratedApp` with the structured project based on your DSL definitions.
+This command will create a new directory named `myDirectory` with the structured project based on your DSL definitions.
 
 ### 3. Navigate to Your Project and Install Dependencies
 
 ```bash
-cd MyGeneratedApp
+cd myDirectory
 npm install
 ```
 
