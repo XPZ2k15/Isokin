@@ -1,0 +1,63 @@
+◉ essence: express
+  speak at port 4000
+
+  — △ essence: middleware
+    whisper: parse incoming as json
+    whisper: load environment from '.env'
+    whisper: log requests
+    whisper: serve static from './public'
+    whisper: enable cors
+    whisper: npm install cors
+    
+  — ✴ essence: database
+    whisper: db type mssql
+    whisper: connect to 'mssql://username:password@192.168.1.91:1433/clearvision'
+    whisper: use collection 'users'
+    whisper: use collection 'products'
+    whisper: use collection 'categories'
+    whisper: use collection 'orders'
+    whisper: db migration 'create_users_table' with fields { id: int pk identity, username: varchar(255), password: varchar(255) }
+    whisper: db migration 'create_products_table' with fields { id: int pk identity, name: varchar(255), description: varchar(max), price: decimal(10,2), categoryId: int, stock: int }
+    whisper: db migration 'create_categories_table' with fields { id: int pk identity, name: varchar(255), description: varchar(max) }
+    whisper: db migration 'create_orders_table' with fields { id: int pk identity, userId: int, total: decimal(10,2), createdAt: datetime, status: varchar(50) }
+
+  — △ essence: auth
+    whisper: auth enable
+    whisper: auth strategy jwt
+    whisper: auth route /users/:id requires login
+    whisper: auth route /products/:id requires login
+    whisper: auth route /categories/:id requires login
+    whisper: auth route /orders/:id requires login
+    whisper: auth route /users requires login
+    whisper: auth route /products requires login
+    whisper: auth route /categories requires login
+    whisper: auth route /orders requires login
+
+  — △ essence: frontend
+    whisper: frontend framework react
+    whisper: npm install axios
+
+  — ▢ path: /users
+    when asked for /users, offer all items from 'users'
+    when posted to /users with body {username,password}, insert into 'users', return inserted document
+
+  — ▢ path: /users/:id
+    when asked for /users/:id, retrieve item by id from 'users'
+
+  — ▢ path: /products
+    when asked for /products, offer all items from 'products'
+    when asked for /products/:id, retrieve item by id from 'products'
+    when posted to /products with body {name,description,price,categoryId,stock}, insert into 'products', return inserted document
+
+  — ▢ path: /categories
+    when asked for /categories, offer all items from 'categories'
+    when asked for /categories/:id, retrieve item by id from 'categories'
+    when posted to /categories with body {name,description}, insert into 'categories', return inserted document
+
+  — ▢ path: /orders
+    when asked for /orders, offer all items from 'orders'
+    when asked for /orders/:id, retrieve item by id from 'orders'
+    when posted to /orders with body {userId,total,status}, insert into 'orders', return inserted document
+
+  — ▢ path: /checkout
+    when posted to /checkout with body {userId,products,total}, process checkout, return order confirmation

@@ -1,0 +1,30 @@
+◉ essence: express
+  speak at port 4000
+
+  — △ essence: middleware
+    whisper: parse incoming as json
+    whisper: load environment from '.env'
+    whisper: log requests
+    whisper: serve static from './public'
+
+  — ✴ essence: database
+    whisper: db type mssql
+    whisper: connect to 'mssql://sa:Nort7988@192.168.1.66:1433/clearvision'
+    whisper: use collection 'users'
+    whisper: db migration 'create_users_table' with fields { id: int pk identity, username: varchar(255), password: varchar(255) }
+
+  — △ essence: auth
+    whisper: auth enable
+    whisper: auth strategy jwt
+    whisper: auth route /users/:id requires login
+
+  — △ essence: frontend
+    whisper: frontend framework react
+    whisper: npm install axios
+
+  — ▢ path: /users
+    when asked for /users, offer all items from 'users'
+    when posted to /users with body {username,password}, insert into 'users', return inserted document
+
+  — ▢ path: /users/:id
+    when asked for /users/:id, retrieve item by id from 'users'

@@ -1,0 +1,88 @@
+◉ essence: express
+  speak at port 12000
+
+  — △ essence: middleware
+    whisper: parse incoming as json
+    whisper: load environment from '.env'
+    whisper: log requests
+    whisper: serve static from './public'
+    whisper: enable cors
+    whisper: npm install cors
+
+  — ✴ essence: database
+    whisper: db type mssql
+    whisper: connect to 'mssql://username:password@192.168.1.91:1433/twitchClone'
+    whisper: use collection 'users',
+    whisper: use collection 'streams'
+    whisper: use collection 'chats'
+    whisper: use collection 'followers'
+    whisper: use collection 'subscriptions'
+    whisper: db migration 'create_users_table' with fields { id: int pk identity, username: varchar(255) unique, email: varchar(255) unique, password: varchar(255), bio: varchar(max), avatarUrl: varchar(255), createdAt: datetime default GETDATE() }
+    whisper: db migration 'create_streams_table' with fields { id: int pk identity, userId: int foreign key references users(id), title: varchar(255), description: varchar(max), streamUrl: varchar(255), thumbnailUrl: varchar(255), isLive: bit default 0, createdAt: datetime default GETDATE(), updatedAt: datetime default GETDATE() }
+    whisper: db migration 'create_chats_table' with fields { id: int pk identity, streamId: int foreign key references streams(id), userId: int foreign key references users(id), message: varchar(max), sentAt: datetime default GETDATE() }
+    whisper: db migration 'create_followers_table' with fields { id: int pk identity, userId: int foreign key references users(id), followerId: int foreign key references users(id), followedAt: datetime default GETDATE() }
+    whisper: db migration 'create_subscriptions_table' with fields { id: int pk identity, userId: int foreign key references users(id), subscriberId: int foreign key references users(id), tier: varchar(50), subscribedAt: datetime default GETDATE() }
+
+  — △ essence: auth
+    whisper: auth enable
+    whisper: auth strategy jwt
+    whisper: auth secret YourJWTSecretKey
+    whisper: auth route /users/:id requires login
+    whisper: auth route /streams/:id requires login
+    whisper: auth route /chats/:id requires login
+    whisper: auth route /followers/:id requires login
+    whisper: auth route /subscriptions/:id requires login
+    whisper: auth route /streams requires login
+    whisper: auth route /chats requires login
+    whisper: auth route /followers requires login
+    whisper: auth route /subscriptions requires login
+    whisper: npm install jsonwebtoken bcrypt
+
+  — △ essence: frontend
+    whisper: frontend framework react
+    whisper: npm install axios react-router-dom socket.io-client
+
+  — ▢ path: /users
+    when asked for /users, offer all items from 'users'
+    when posted to /users with body {username, email, password, bio, avatarUrl}, hash password, insert into 'users', return inserted document
+
+  — ▢ path: /users/:id
+    when asked for /users/:id, retrieve item by id from 'users'
+    when put to /users/:id with body {username, email, bio, avatarUrl}, update user
+    when delete /users/:id, remove user
+
+  — ▢ path: /streams
+    when asked for /streams, offer all live streams from 'streams' where isLive = 1
+    when posted to /streams with body {userId, title, description, streamUrl, thumbnailUrl}, insert into 'streams', return inserted document
+
+  — ▢ path: /streams/:id
+    when asked for /streams/:id, retrieve stream by id from 'streams'
+    when put to /streams/:id with body {title, description, streamUrl, thumbnailUrl, isLive}, update stream
+    when delete /streams/:id, remove stream
+
+  — ▢ path: /chats
+    when asked for /chats?streamId=:streamId, offer all chat messages for the stream
+    when posted to /chats with body {streamId, userId, message}, insert into 'chats', return inserted document
+
+  — ▢ path: /followers
+    when asked for /followers?userId=:userId, offer all followers for the user
+    when posted to /followers with body {userId, followerId}, insert into 'followers', return inserted document
+    when delete /followers with body {userId, followerId}, remove follower
+
+  — ▢ path: /subscriptions
+    when asked for /subscriptions?userId=:userId, offer all subscriptions for the user
+    when posted to /subscriptions with body {userId, subscriberId, tier}, insert into 'subscriptions', return inserted document
+    when delete /subscriptions with body {userId, subscriberId}, remove subscription
+
+  — ▢ path: /auth/login
+    when posted to /auth/login with body {email, password}, verify user credentials, return JWT token
+
+  — ▢ path: /auth/register
+    when posted to /auth/register with body {username, email, password, bio, avatarUrl}, hash password, insert into 'users', return inserted document
+
+  — ▢ path: /search
+    when queried with /search?query=:query, search users, streams, and categories matching the query, return aggregated results
+
+  — ▢ path: /notifications
+    when asked for /notifications?userId=:userId, offer all notifications for the user
+    when posted to /notifications with body {userId, type, message, relatedId}, insert into 'notifications', return inserted document
